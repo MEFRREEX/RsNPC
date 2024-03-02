@@ -53,7 +53,7 @@ public class CreateSubCommand extends BaseSubCommand {
             map.put("z", player.getZ());
             map.put("yaw", Utils.getYaw(player));
             map.put("level", player.getLevel().getName());
-            config.set("坐标", map);
+            config.set("position", map);
             config.save();
             RsNpcConfig rsNpcConfig;
             try {

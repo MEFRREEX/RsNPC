@@ -46,7 +46,7 @@ public class FormHelper {
         }
         if (player.hasPermission("RsNPC.admin.reload")) {
             simple.addButton(new ResponseElementButton(language.translateString("gui.main.button.reloadText"))
-                    .onClicked(cp -> Server.getInstance().dispatchCommand(cp, "rsnpc reload"))
+                    .onClicked(cp -> Server.getInstance().executeCommand(cp, "rsnpc reload"))
             );
         }
 
@@ -62,7 +62,7 @@ public class FormHelper {
 
         custom.onResponded((formResponseCustom, cp) -> {
             String name = formResponseCustom.getInputResponse(0);
-            Server.getInstance().dispatchCommand(cp, "rsnpc create " + name);
+            Server.getInstance().executeCommand(cp, "rsnpc create " + name);
         });
         custom.onClosed(FormHelper::sendMain);
 
@@ -135,36 +135,37 @@ public class FormHelper {
         }
 
         simple.setContent(
-                "名称: " + rsNpcConfig.getName() +
-                "\n显示名称: " + rsNpcConfig.getShowName() +
-                "\n显示名称一直可见: " + toAdminNpcBooleanShowText(rsNpcConfig.isNameTagAlwaysVisible()) +
-                "\n坐标:\n  x: " + NukkitMath.round(rsNpcConfig.getLocation().getX(), 2) +
+                "Name: " + rsNpcConfig.getName() +
+                "\nDisplay name: " + rsNpcConfig.getShowName() +
+                "\nName is always visible: " + toAdminNpcBooleanShowText(rsNpcConfig.isNameTagAlwaysVisible()) +
+                "\nPosition:\n  x: " + NukkitMath.round(rsNpcConfig.getLocation().getX(), 2) +
                 "\n  y: " + NukkitMath.round(rsNpcConfig.getLocation().getY(), 2) +
                 "\n  z: " + NukkitMath.round(rsNpcConfig.getLocation().getZ(), 2) +
                 "\n  yaw: " + NukkitMath.round(rsNpcConfig.getLocation().getYaw(), 3) +
-                "\n  世界: " + rsNpcConfig.getLocation().getLevel().getName() +
-                "\n物品:\n  手持: " + hand.getId() + ":" + hand.getDamage() +
-                "\n  头部: " + armor[0].getId() + ":" + armor[0].getDamage() +
-                "\n  胸部: " + armor[1].getId() + ":" + armor[1].getDamage() +
-                "\n  腿部: " + armor[2].getId() + ":" + armor[2].getDamage() +
-                "\n  脚部: " + armor[3].getId() + ":" + armor[3].getDamage() +
-                "\n皮肤: " + rsNpcConfig.getSkinName() +
-                "\n实体NetworkId: " + rsNpcConfig.getNetworkId() +
-                "\n实体大小: " + rsNpcConfig.getScale() +
-                "\n看向玩家: " + toAdminNpcBooleanShowText(rsNpcConfig.isLookAtThePlayer()) +
-                "\n表情动作:\n  启用: " + toAdminNpcBooleanShowText(rsNpcConfig.isEnableEmote()) +
-                "\n  表情ID: " + emotes +
-                "\n  间隔(秒): " + rsNpcConfig.getShowEmoteInterval() +
-                "\n允许抛射物触发: " + toAdminNpcBooleanShowText(rsNpcConfig.isCanProjectilesTrigger()) +
-                "\n点击执行指令: " + cmds +
-                "\n点击发送消息: " + messages +
-                "\n对话框:" +
-                "\n  启用对话框: " + toAdminNpcBooleanShowText(rsNpcConfig.isEnabledDialogPages()) +
-                "\n  对话框配置: " + rsNpcConfig.getDialogPagesName() +
-                "\n移动:" +
-                "\n  基础移动速度: " + rsNpcConfig.getBaseMoveSpeed() +
-                "\n  启用辅助寻路: " + toAdminNpcBooleanShowText(rsNpcConfig.isEnablePathfinding()) +
-                "\n  路径: " + route +
+                "\n  world: " + rsNpcConfig.getLocation().getLevel().getName() +
+                "\nItems:" +
+                "\n  Hand: " + hand.getId() + ":" + hand.getDamage() +
+                "\n  Head: " + armor[0].getId() + ":" + armor[0].getDamage() +
+                "\n  Chestplate: " + armor[1].getId() + ":" + armor[1].getDamage() +
+                "\n  Leggings: " + armor[2].getId() + ":" + armor[2].getDamage() +
+                "\n  Boots: " + armor[3].getId() + ":" + armor[3].getDamage() +
+                "\nSkin: " + rsNpcConfig.getSkinName() +
+                "\nEntity NetworkID: " + rsNpcConfig.getNetworkId() +
+                "\nEntity Size: " + rsNpcConfig.getScale() +
+                "\nLook at player: " + toAdminNpcBooleanShowText(rsNpcConfig.isLookAtThePlayer()) +
+                "\nEmotions:\n  enable: " + toAdminNpcBooleanShowText(rsNpcConfig.isEnableEmote()) +
+                "\n  Emoteid: " + emotes +
+                "\n  Interval: " + rsNpcConfig.getShowEmoteInterval() +
+                "\nProjectile triggering: " + toAdminNpcBooleanShowText(rsNpcConfig.isCanProjectilesTrigger()) +
+                "\nCommands: " + cmds +
+                "\nMessages: " + messages +
+                "\nDialog:" +
+                "\n  Enabled: " + toAdminNpcBooleanShowText(rsNpcConfig.isEnabledDialogPages()) +
+                "\n  Dialog: " + rsNpcConfig.getDialogPagesName() +
+                "\nMovement:" +
+                "\n  Speed: " + rsNpcConfig.getBaseMoveSpeed() +
+                "\n  Assisted pathfinding: " + toAdminNpcBooleanShowText(rsNpcConfig.isEnablePathfinding()) +
+                "\n  Trail: " + route +
                 "\n\n");
 
         simple.addButton(new ResponseElementButton(language.translateString("gui.adminNPC.button.modifyBasicConfig"))
@@ -176,7 +177,7 @@ public class FormHelper {
         simple.addButton(new ResponseElementButton(language.translateString("gui.adminNPC.button.modifyMessage"))
                 .onClicked(cp -> sendAdminNpcConfigMessage(cp, rsNpcConfig)));
         simple.addButton(new ResponseElementButton(language.translateString("gui.adminNPC.button.deleteNPC"))
-                .onClicked(cp -> Server.getInstance().dispatchCommand(cp, "rsnpc delete " + rsNpcConfig.getName())));
+                .onClicked(cp -> Server.getInstance().executeCommand(cp, "rsnpc delete " + rsNpcConfig.getName())));
         simple.onClosed(FormHelper::sendAdminNpcSelect);
 
         player.showFormWindow(simple);
@@ -207,7 +208,7 @@ public class FormHelper {
         custom.addElement(new ElementInput(language.translateString("gui.adminNPCConfig.input.itemChestplate"), "0:0", Utils.item2String(armor[1]))); //4
         custom.addElement(new ElementInput(language.translateString("gui.adminNPCConfig.input.itemLeggings"), "0:0", Utils.item2String(armor[2]))); //5
         custom.addElement(new ElementInput(language.translateString("gui.adminNPCConfig.input.itemBoots"), "0:0", Utils.item2String(armor[3]))); //6
-        //皮肤
+        //skin
         ArrayList<String> skinOptions = new ArrayList<>(RsNPC.getInstance().getSkins().keySet());
         skinOptions.add("Default Skin");
         int defaultOption = -1;
@@ -253,17 +254,17 @@ public class FormHelper {
                 items[2] = Item.fromString(formResponseCustom.getInputResponse(5));
                 items[3] = Item.fromString(formResponseCustom.getInputResponse(6));
                 rsNpcConfig.setArmor(items);
-                //皮肤
+                //skin
                 String skinName = skinOptions.get(formResponseCustom.getDropdownResponse(7).getElementID());
                 rsNpcConfig.setSkinName(skinName);
                 rsNpcConfig.setSkin(RsNPC.getInstance().getSkinByName(skinName));
-                //实体NetworkId
+                //entity-networkid
                 try {
                     rsNpcConfig.setNetworkId(Integer.parseInt(formResponseCustom.getInputResponse(8)));
                 }catch (Exception e) {
                     player.sendMessage(language.translateString("gui.adminNPCConfig.responded.networkIdError"));
                 }
-                //实体大小
+                //entity-size
                 String scaleString = formResponseCustom.getInputResponse(9);
                 float scale = rsNpcConfig.getScale();
                 try {
@@ -304,7 +305,7 @@ public class FormHelper {
     }
 
     /**
-     * 设置表情动作界面
+     * 设置emotions界面
      *
      * @param player 玩家
      * @param rsNpcConfig npc配置
@@ -562,7 +563,7 @@ public class FormHelper {
             "放火烧山可莉完蛋",
             "RsNPC的寻路只是辅助性质的哦！",
             "路径点距离较远时，RsNPC可能会占用更多的性能进行寻路！",
-            "创造模式无法正常使用对话框功能，RsNPC会尝试把您的游戏模式暂时改为冒险模式"
+            "创造模式无法正常使用dialog功能，RsNPC会尝试把您的游戏模式暂时改为冒险模式"
     );
 
     private final static SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("MM-dd");

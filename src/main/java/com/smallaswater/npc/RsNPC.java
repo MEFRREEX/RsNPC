@@ -44,7 +44,7 @@ public class RsNPC extends PluginBase {
             new ThreadPoolExecutor.DiscardPolicy());
     public static final Random RANDOM = new Random();
 
-    public static final String VERSION = "?";
+    public static final String VERSION = "2.4.4-PNX";
 
     private static RsNPC rsNPC;
 
@@ -192,7 +192,7 @@ public class RsNPC extends PluginBase {
         }
         config.load(resource);
         this.language = new Language(config);
-        this.getLogger().info("§aLanguage: " + this.setLang + " loaded !");
+        this.getLogger().info("Language: " + this.setLang + " loaded !");
     }
 
     private void loadNpcs() {
@@ -229,11 +229,11 @@ public class RsNPC extends PluginBase {
     }
 
     /**
-     * 加载内置皮肤
+     * 加载内置skin
      */
     private void loadPrivateSkins() {
         this.skins.put("private_steve", DEFAULT_SKIN);
-        String[] skins = { "阳", "糖菲_slim", "玉茗_slim" };
+        String[] skins = { "male", "sugarfi_slim", "yuming_slim" };
         for (String skinName : skins) {
             try {
                 ImageInputStream imageInputStream = ImageIO.createImageInputStream(this.getResource("Skins/" + skinName + ".png"));
@@ -296,7 +296,7 @@ public class RsNPC extends PluginBase {
                     continue;
                 }
 
-                //如果是4D皮肤
+                //如果是4Dskin
                 try {
                     File skinJsonFile = null;
                     if (file.isFile()) {
@@ -309,7 +309,7 @@ public class RsNPC extends PluginBase {
                         String geometryName = null;
 
                         String formatVersion = (String) skinJson.getOrDefault("format_version", "1.10.0");
-                        skin.setGeometryDataEngineVersion(formatVersion); //设置皮肤版本，主流格式有1.16.0,1.12.0(Blockbench新模型),1.10.0(Blockbench Legacy模型),1.8.0
+                        skin.setGeometryDataEngineVersion(formatVersion); //设置skin版本，主流格式有1.16.0,1.12.0(Blockbench新模型),1.10.0(Blockbench Legacy模型),1.8.0
                         switch (formatVersion) {
                             case "1.16.0":
                             case "1.12.0":

@@ -75,11 +75,11 @@ public class ConfigUpdateUtils {
                     continue;
                 }
 
-                // 表情动作.间隔(秒) -> 表情动作.间隔
-                HashMap<Object, Object> map = config.get("表情动作", new HashMap<>());
-                map.put("间隔", map.getOrDefault("间隔(秒)", 10));
-                map.remove("间隔(秒)");
-                config.set("表情动作", map);
+                // emotions.interval(秒) -> emotions.interval
+                HashMap<Object, Object> map = config.get("emotions", new HashMap<>());
+                map.put("interval", map.getOrDefault("interval(秒)", 10));
+                map.remove("interval(秒)");
+                config.set("emotions", map);
 
                 config.set(RsNpcConfig.NPC_CONFIG_VERSION_KEY, "2.2.3");
 

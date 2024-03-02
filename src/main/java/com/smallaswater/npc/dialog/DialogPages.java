@@ -80,7 +80,7 @@ public class DialogPages {
         }
 
         public void send(@NotNull EntityRsNPC entityRsNpc, @NotNull Player player) {
-            //RsNPC的对话框没有实现编辑界面，创造玩家先转为冒险模式，再发送对话框，最后恢复玩家的游戏模式
+            //RsNPC的dialog没有实现编辑界面，创造玩家先转为冒险模式，再发送dialog，最后恢复玩家的游戏模式
             int beforeGameMode = -1;
             if (player.getGamemode() == Player.CREATIVE) {
                 beforeGameMode = player.getGamemode();

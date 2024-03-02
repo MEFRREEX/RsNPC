@@ -27,45 +27,45 @@ plugin.disable.complete: "RsNPC disable complete"
 tips.command.noPermissions: "You do not have permission to use this command!"
 tips.command.cannotBeUsedInConsole: "You can't use this command in the console!"
 
-tips.npcNotExist: "§c§lNPC %1% does not exist!"
-tips.npcRouteAddSuccess: "§a§l has been added to the path!"
-tips.npcAlreadyExist: "§c§lAn NPC named %1% already exists!"
-tips.npcCreateSuccess: "§a§lSuccessfully created NPC %1%!"
-tips.command.npcRemoveSuccess: "§a§lSuccessfully deleted NPC %1%!"
-tips.command.npcRemoveFileFailed: "§c§lNPC %1% configuration file deletion failed! Please try to delete manually!"
-tips.nameRequired: "§c§lPlease enter the name of the NPC!"
-tips.npcCreationFailed: "§c§l NPC creation failed!"
-tips.reloadSuccess: "§a§lConfiguration reloaded!"
+tips.npcNotExist: "§cNPC %1% does not exist!"
+tips.npcRouteAddSuccess: "§a has been added to the path!"
+tips.npcAlreadyExist: "§cAn NPC named %1% already exists!"
+tips.npcCreateSuccess: "§aSuccessfully created NPC %1%!"
+tips.command.npcRemoveSuccess: "§aSuccessfully deleted NPC %1%!"
+tips.command.npcRemoveFileFailed: "§cNPC %1% configuration file deletion failed! Please try to delete manually!"
+tips.nameRequired: "§cPlease enter the name of the NPC!"
+tips.npcCreationFailed: "§c NPC creation failed!"
+tips.reloadSuccess: "§aConfiguration reloaded!"
 
 tips.command.help: |-
-  §a§l >> §eHelp for RsNPC §a<<
-  §a§l/rsnpc §7Open the GUI interface
-  §a§l/rsnpc create <NPC Name> §7Create an NPC at the current location
-  §a§l/rsnpc delete <NPC Name> §7Remove NPC
-  §a§l/rsnpc addroute <NPC Name> §7Add current location to NPC paths
-  §a§l/rsnpc reload §7reload NPC
-  §a§l >> §eHelp for RsNPC §a<<
+  §a >> §eHelp for RsNPC §a<<
+  §a/rsnpc §7Open the GUI interface
+  §a/rsnpc create <NPC Name> §7Create an NPC at the current location
+  §a/rsnpc delete <NPC Name> §7Remove NPC
+  §a/rsnpc addroute <NPC Name> §7Add current location to NPC paths
+  §a/rsnpc reload §7reload NPC
+  §a >> §eHelp for RsNPC §a<<
 
 gui.main.title: "§b>>§rRsNPC - MainMenu§b<<"
-gui.main.button.createNPCText: "§e§lCreate NPC"
-gui.main.button.adminNPCText: "§e§lManage NPC"
-gui.main.button.reloadText: "§e§lreload configuration"
+gui.main.button.createNPCText: "§eCreate NPC"
+gui.main.button.adminNPCText: "§eManage NPC"
+gui.main.button.reloadText: "§ereload configuration"
 
 gui.createNPC.title: "§b>>§rRsNPC - CreateNPC§b<<"
 gui.createNPC.input.npcNameText: "NPC Name"
 
 gui.adminNPCSelect.title: "§b>>§rRsNPC - ManageNPC§b<<"
-gui.adminNPCSelect.content: "§e§lPlease select the NPC to set"
+gui.adminNPCSelect.content: "§ePlease select the NPC to set"
 
 gui.adminNPC.title: "§b>>§rRsNPC - ManageNPC§b<<"
 gui.adminNPC.text.empty: "Empty"
 gui.adminNPC.text.true: "true"
 gui.adminNPC.text.false: "false"
-gui.adminNPC.button.modifyBasicConfig: "§e§lModify the basic configuration"
-gui.adminNPC.button.modifyEmote: "§e§lModify emotes"
-gui.adminNPC.button.modifyCommand: "§e§lModify the click command"
-gui.adminNPC.button.modifyMessage: "§e§lModify click message"
-gui.adminNPC.button.deleteNPC: "§c§ldelete npc"
+gui.adminNPC.button.modifyBasicConfig: "§eModify the basic configuration"
+gui.adminNPC.button.modifyEmote: "§eModify emotes"
+gui.adminNPC.button.modifyCommand: "§eModify the click command"
+gui.adminNPC.button.modifyMessage: "§eModify click message"
+gui.adminNPC.button.deleteNPC: "§cdelete npc"
 
 gui.adminNPCConfig.title: "§b>>§rRsNPC - SetUpNPC§b<<"
 gui.adminNPCConfig.input.displayName: "npc display name"

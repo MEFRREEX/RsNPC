@@ -1,41 +1,41 @@
-#NPC 配置文件
+# Default NPC
 ---
 configVersion: 2.2.3
 name: "NPC1"
 nameTagAlwaysVisible: true
-坐标:
+position:
   x: 0
   y: 0
   z: 0
   yaw: 0.0
   level: "world"
-手持: "267:0"
-头部: ""
-胸部: ""
-腿部: ""
-脚部: ""
-皮肤: "private_steve"
-实体NetworkId: -1
-实体大小: 1.0
-看向玩家: true
-表情动作:
-  启用: false
-  表情ID:
+hand-item: "267:0"
+head-item: ""
+chestplate-item: ""
+leggings-item: ""
+boots-item: ""
+skin: "private_steve"
+entity-networkid: -1
+entity-size: 1.0
+look-at-player: true
+emotions:
+  enable: false
+  emoteid:
     - "4c8ae710-df2e-47cd-814d-cc7bf21a3d67"
-  间隔: 10
-允许抛射物触发: true
-点击执行指令:
+  interval: 10
+projectile-triggering: true
+commands:
   - "give @p 260 1&con"
-发送消息:
-  - "%npcName%： @p 您好"
-  - "送您一个苹果！"
-基础移动速度: 1.0
+messages:
+  - "%npcName%：@p hello"
+  - "Take the apple!"
+movement-speed: 1.0
 route: []
-启用辅助寻路: true
-旋转: 0.0
-对话框:
-  启用: false
-  页面: "demo"
+enable-assisted-pathfinding: true
+whirling: 0.0
+dialog:
+  enable: false
+  dialog: "demo"
 CustomEntity:
   enable: false
   identifier: "RsNPC"

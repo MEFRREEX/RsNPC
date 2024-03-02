@@ -22,7 +22,7 @@ public final class Api {
         HIDE_CUSTOM_SKIN_PLAYERS.remove(player);
     }
 
-    @Info("针对指定玩家隐藏自定义皮肤")
+    @Info("针对指定玩家隐藏自定义skin")
     public static void hideCustomSkin(@NotNull Player player) {
         hideCustomSkin(player.getName());
     }

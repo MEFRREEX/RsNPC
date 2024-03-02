@@ -1,4 +1,4 @@
-# 对话框 配置文件描述
+# dialog 配置文件描述
 header: |-
   RsNPC - dialog configuration file
   Warning! Make sure you have mastered the YAML syntax before editing this file!

@@ -31,7 +31,7 @@ public class DeleteSubCommand extends BaseSubCommand {
         if (args.length > 1) {
             String name = args[1];
             if (!this.rsNPC.getNpcs().containsKey(name)) {
-                sender.sendMessage("§c§lNPC " + name + "不存在...");
+                sender.sendMessage("NPC " + name + " not found");
                 return true;
             }
             this.rsNPC.getNpcs().get(name).getEntityRsNpc().close();

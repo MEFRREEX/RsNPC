@@ -82,7 +82,7 @@ public class OnListener implements Listener {
                         if (dialogConfig != null) {
                             dialogConfig.getDefaultDialogPage().send(entityRsNpc, player);
                         }else {
-                            String message = "§cNPC " + rsNpcConfig.getName() + " 配置错误！不存在名为 " + rsNpcConfig.getDialogPagesName() + " 的对话框页面！";
+                            String message = "NPC " + rsNpcConfig.getName() + " configuration error！Dialog not found: " + rsNpcConfig.getDialogPagesName();
                             this.rsNPC.getLogger().warning(message);
                             if (player.isOp()) {
                                 player.sendMessage(message);
@@ -103,7 +103,7 @@ public class OnListener implements Listener {
                     for (RsNpcConfig config : this.rsNPC.getNpcs().values()) {
                         EntityRsNPC entityRsNpc = config.getEntityRsNpc();
                         if (entityRsNpc != null && entityRsNpc.getUniqueId() == entry.uuid) {
-                            entry.skin = this.rsNPC.getSkinByName("默认皮肤");
+                            entry.skin = this.rsNPC.getSkinByName("默认skin");
                             break;
                         }
                     }

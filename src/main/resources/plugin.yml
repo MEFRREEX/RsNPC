@@ -12,16 +12,16 @@ softdepend:
 permissions:
   RsNPC.admin:
     default: op
-    description: "RsNPC 插件主命令"
+    description: "Plugin main command"
   RsNPC.admin.create:
     default: op
-    description: "RsNPC 创建NPC命令"
+    description: "Create NPC command"
   RsNPC.admin.delete:
     default: op
-    description: "RsNPC 删除NPC命令"
+    description: "Delete NPC command"
   RsNPC.admin.reload:
     default: op
-    description: "RsNPC 重载配置文件命令"
+    description: "Reload config command"
   RsNPC.admin.addroute:
     default: op
-    description: "RsNPC 添加NPC移动路径命令"
+    description: "Add NPC movement path command"
