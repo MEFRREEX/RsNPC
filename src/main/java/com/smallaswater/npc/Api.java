@@ -19,7 +19,7 @@ public final class Api {
     private static final Set<String> HIDE_CUSTOM_SKIN_PLAYERS = new HashSet<>();
 
     public static void removeAll(Player player) {
-        HIDE_CUSTOM_SKIN_PLAYERS.remove(player);
+        HIDE_CUSTOM_SKIN_PLAYERS.remove(player.getName());
     }
 
     @Info("针对指定玩家隐藏自定义skin")

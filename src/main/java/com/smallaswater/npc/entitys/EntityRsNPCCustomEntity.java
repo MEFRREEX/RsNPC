@@ -12,12 +12,9 @@ import cn.nukkit.nbt.tag.CompoundTag;
 import cn.nukkit.network.protocol.AddEntityPacket;
 import cn.nukkit.network.protocol.DataPacket;
 import cn.nukkit.network.protocol.SetEntityLinkPacket;
-import cn.nukkit.network.protocol.types.EntityLink;
 import com.smallaswater.npc.data.RsNpcConfig;
 import com.smallaswater.npc.variable.VariableManage;
 import lombok.NonNull;
-
-import static cn.nukkit.network.protocol.SetEntityLinkPacket.TYPE_PASSENGER;
 
 /**
  * 基于自定义实体功能实现的RsNPC实体

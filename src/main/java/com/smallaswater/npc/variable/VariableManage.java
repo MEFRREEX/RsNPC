@@ -16,6 +16,7 @@ import java.util.function.Supplier;
 /**
  * @author lt_name
  */
+@SuppressWarnings("deprecation")
 public class VariableManage {
 
     private static final ConcurrentHashMap<String, BiFunction<IPlayer, RsNpcConfig, Object>> VARIABLES = new ConcurrentHashMap<>();

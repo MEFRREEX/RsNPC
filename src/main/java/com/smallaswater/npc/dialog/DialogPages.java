@@ -33,6 +33,7 @@ public class DialogPages {
         this.load();
     }
 
+    @SuppressWarnings("unchecked")
     private void load() {
         this.defaultPage = config.getString("defaultPage");
         this.config.getMapList("pages").forEach(page -> {
@@ -65,12 +66,14 @@ public class DialogPages {
 
         private String closeGo;
 
-        public DialogPage (@NotNull DialogPages dialogPages, @NotNull Map<String, Object> map) {
+        @SuppressWarnings("unchecked")
+        public DialogPage(@NotNull DialogPages dialogPages, @NotNull Map<String, Object> map) {
             this.dialogPages = dialogPages;
             this.key = (String) map.get("key");
             this.title = (String) map.get("title");
             this.content = (String) map.get("content");
-            ((List<Map<String, Object>>) map.get("buttons")).forEach(button -> this.buttons.add(new Button(button)));
+            List<Map<String, Object>> buttons = (List<Map<String, Object>>) map.get("buttons");
+            buttons.forEach(button -> this.buttons.add(new Button(button)));
             if (map.containsKey("close")) {
                 Map<String, Object> closeMap = (Map<String, Object>) map.get("close");
                 if (closeMap.containsKey("go")) {
@@ -145,6 +148,7 @@ public class DialogPages {
             @Getter
             private final List<ButtonAction> buttonActions = new ArrayList<>();
 
+            @SuppressWarnings("unchecked")
             public Button(@NotNull Map<String, Object> map) {
                 this.text = (String) map.get("text");
                 if (map.containsKey("action")) {

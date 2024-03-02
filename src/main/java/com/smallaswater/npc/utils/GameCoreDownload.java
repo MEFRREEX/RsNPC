@@ -146,8 +146,9 @@ public class GameCoreDownload {
                 URLClassLoader pluginClass = (URLClassLoader) PluginClass;
                 URL url = pluginClass.getURLs()[0];
                 file = new File(URLDecoder.decode(url.getFile(), "UTF-8"));
+                pluginClass.close();
             }
-        } catch (UnsupportedEncodingException ignored) {
+        } catch (IOException ignored) {
 
         }
         return file;

@@ -63,7 +63,7 @@ public class Utils {
             if (c.length > 1) {
                 if ("con".equals(c[1])) {
                     try {
-                        Server.getInstance().dispatchCommand(Server.getInstance().getConsoleSender(),
+                        Server.getInstance().executeCommand(Server.getInstance().getConsoleSender(),
                                 VariableManage.stringReplace(player, command, rsNpcConfig));
                     } catch (Exception e) {
                         RsNPC.getInstance().getLogger().error(
@@ -80,7 +80,7 @@ public class Utils {
                         player.setOp(true);
                     }
                     try {
-                        Server.getInstance().dispatchCommand(player, VariableManage.stringReplace(player, command, rsNpcConfig));
+                        Server.getInstance().executeCommand(player, VariableManage.stringReplace(player, command, rsNpcConfig));
                     } catch (Exception e) {
                         RsNPC.getInstance().getLogger().error(
                                 "OP权限执行命令时出现错误！NPC:" + rsNpcConfig.getName() +
@@ -95,7 +95,7 @@ public class Utils {
                 }
             }
             try {
-                Server.getInstance().dispatchCommand(player, VariableManage.stringReplace(player, command, rsNpcConfig));
+                Server.getInstance().executeCommand(player, VariableManage.stringReplace(player, command, rsNpcConfig));
             } catch (Exception e) {
                 RsNPC.getInstance().getLogger().error(
                         "玩家权限执行命令时出现错误！NPC:" + rsNpcConfig.getName() +
