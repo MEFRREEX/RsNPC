@@ -1,18 +1,19 @@
 package com.smallaswater.npc.entitys;
 
-import cn.lanink.gamecore.utils.EntityUtils;
-import cn.lanink.gamecore.utils.packet.ProtocolVersion;
 import cn.nukkit.Player;
 import cn.nukkit.Server;
 import cn.nukkit.block.BlockLiquid;
 import cn.nukkit.entity.EntityHuman;
-import cn.nukkit.entity.data.EntityMetadata;
+import cn.nukkit.entity.custom.CustomEntity;
+import cn.nukkit.entity.data.EntityDataMap;
+import cn.nukkit.entity.data.EntityDataTypes;
 import cn.nukkit.entity.data.Skin;
 import cn.nukkit.level.Level;
-import cn.nukkit.level.format.FullChunk;
+import cn.nukkit.level.format.IChunk;
 import cn.nukkit.math.Vector3;
 import cn.nukkit.nbt.tag.CompoundTag;
 import cn.nukkit.network.protocol.*;
+import cn.nukkit.network.protocol.types.EntityLink;
 import com.smallaswater.npc.RsNPC;
 import com.smallaswater.npc.data.RsNpcConfig;
 import com.smallaswater.npc.route.Node;
@@ -25,7 +26,7 @@ import lombok.Setter;
 import java.util.HashSet;
 import java.util.LinkedList;
 
-public class EntityRsNPC extends EntityHuman {
+public class EntityRsNPC extends EntityHuman implements CustomEntity {
 
     @Getter
     private final RsNpcConfig config;
@@ -48,11 +49,11 @@ public class EntityRsNPC extends EntityHuman {
      * RsNPC实体在创建时必须传入RsNPCConfig参数，保留此方法仅为兼容核心创建实体方法
      */
     @Deprecated
-    public EntityRsNPC(FullChunk chunk, CompoundTag nbt) {
+    public EntityRsNPC(IChunk chunk, CompoundTag nbt) {
         this(chunk, nbt, null);
     }
 
-    public EntityRsNPC(@NonNull FullChunk chunk, @NonNull CompoundTag nbt, RsNpcConfig config) {
+    public EntityRsNPC(@NonNull IChunk chunk, @NonNull CompoundTag nbt, RsNpcConfig config) {
         super(chunk, nbt);
         this.config = config;
         if (this.config == null) {
@@ -60,7 +61,7 @@ public class EntityRsNPC extends EntityHuman {
             return;
         }
         this.setNameTagAlwaysVisible(config.isNameTagAlwaysVisible());
-        this.setNameTagVisible();
+        this.setNameTagVisible(true);
         this.setNameTag(config.getShowName());
         this.setMaxHealth(20);
         this.setHealth(20.0F);
@@ -69,9 +70,9 @@ public class EntityRsNPC extends EntityHuman {
 
         //以下内容在initEntity()中执行，需要在获取到config后再执行一次
         if (config.isEnableCustomCollisionSize()) {
-            this.dataProperties.putFloat(EntityUtils.getEntityField("DATA_BOUNDING_BOX_HEIGHT", DATA_BOUNDING_BOX_HEIGHT), this.getHeight());
-            this.dataProperties.putFloat(EntityUtils.getEntityField("DATA_BOUNDING_BOX_WIDTH", DATA_BOUNDING_BOX_WIDTH), this.getWidth());
-            this.dataProperties.putInt(EntityUtils.getEntityField("DATA_HEALTH", DATA_HEALTH), (int) this.getHealth());
+            this.entityDataMap.put(EntityDataTypes.HEIGHT, this.getHeight());
+            this.entityDataMap.put(EntityDataTypes.WIDTH, this.getWidth());
+            this.entityDataMap.put(EntityDataTypes.STRUCTURAL_INTEGRITY, this.getHealth());
         }
     }
 
@@ -122,16 +123,16 @@ public class EntityRsNPC extends EntityHuman {
             return false;
         }
 
-        //whirling
+        //rotate
         if (this.config.getWhirling() != 0) {
             this.yaw += this.config.getWhirling();
-        }else {
+        } else {
             //寻路
             if (!this.config.getRoute().isEmpty() && this.pauseMoveTick <= 0) {
                 this.processMove(currentTick);
             } else {
-                //look-at-player
-                if (currentTick%2 == 0 && this.config.isLookAtThePlayer() && !this.getViewers().isEmpty()) {
+                //lookPlayer
+                if (currentTick % 2 == 0 && this.config.isLookAtThePlayer() && !this.getViewers().isEmpty()) {
                     this.seePlayer();
                 }
 
@@ -150,16 +151,14 @@ public class EntityRsNPC extends EntityHuman {
                         packet.runtimeId = this.getId();
                         packet.emoteID = this.config.getEmoteIDs().get(RsNPC.RANDOM.nextInt(this.config.getEmoteIDs().size()));
                         packet.flags = 0x3; // FLAG_SERVER | FLAG_MUTE_ANNOUNCEMENT
-                        if (ProtocolInfo.CURRENT_PROTOCOL >= ProtocolVersion.v1_20_0_23) {
-                            packet.xuid = "";
-                            packet.platformId = "";
-                        }
+                        packet.xuid = "";
+                        packet.platformId = "";
                         Server.broadcastPacket(this.getViewers().values(), packet);
                     }
                 }
             }
         }
-        
+
         return super.onUpdate(currentTick);
     }
 
@@ -178,7 +177,7 @@ public class EntityRsNPC extends EntityHuman {
                     this.nodes.addAll(this.nowRouteFinder.getNodes());
                     this.setLockRoute(false);
                 }
-            }else {
+            } else {
                 this.nodes.add(new Node(next));
                 this.nextRouteIndex++;
                 if (this.nextRouteIndex >= this.config.getRoute().size()) {
@@ -273,7 +272,7 @@ public class EntityRsNPC extends EntityHuman {
             this.sendData(player);
         }
 
-        if (!this.hasSpawned.containsKey(player.getLoaderId()) && this.chunk != null && player.usedChunks.containsKey(Level.chunkHash(this.chunk.getX(), this.chunk.getZ()))) {
+        if (!this.hasSpawned.containsKey(player.getLoaderId()) && this.chunk != null && player.getUsedChunks().contains(Level.chunkHash(this.chunk.getX(), this.chunk.getZ()))) {
             this.hasSpawned.put(player.getLoaderId(), player);
             player.dataPacket(this.createAddEntityPacket());
             this.sendData(player);
@@ -283,7 +282,7 @@ public class EntityRsNPC extends EntityHuman {
             SetEntityLinkPacket pkk = new SetEntityLinkPacket();
             pkk.vehicleUniqueId = this.riding.getId();
             pkk.riderUniqueId = this.getId();
-            pkk.type = 1;
+            pkk.type = EntityLink.Type.RIDER;
             pkk.immediate = 1;
             player.dataPacket(pkk);
         }
@@ -323,30 +322,28 @@ public class EntityRsNPC extends EntityHuman {
     }
 
     @Override
-    public void sendData(Player player, EntityMetadata data) {
+    public void sendData(Player player, EntityDataMap data) {
         SetEntityDataPacket pk = new SetEntityDataPacket();
         pk.eid = this.getId();
-        pk.metadata = data == null ? this.dataProperties : data;
-        pk.metadata.putString(
-                EntityUtils.getEntityField("DATA_NAMETAG", DATA_NAMETAG),
+        pk.entityData = data == null ? this.entityDataMap : data;
+        pk.entityData.putType(
+                EntityDataTypes.NAME,
                 VariableManage.stringReplace(player, this.getNameTag(), this.getConfig())
         );
         player.dataPacket(pk);
     }
 
     @Override
-    public void sendData(Player[] players, EntityMetadata data) {
-        SetEntityDataPacket pk = new SetEntityDataPacket();
-        pk.eid = this.getId();
-        pk.metadata = data == null ? this.dataProperties : data;
-
-        for(Player player : players) {
-            SetEntityDataPacket clone = (SetEntityDataPacket) pk.clone();
-            clone.metadata.putString(
-                    EntityUtils.getEntityField("DATA_NAMETAG", DATA_NAMETAG),
+    public void sendData(Player[] players, EntityDataMap data) {
+        for (Player player : players) {
+            SetEntityDataPacket pk = new SetEntityDataPacket();
+            pk.eid = this.getId();
+            pk.entityData = data == null ? this.entityDataMap : data;
+            pk.entityData.putType(
+                    EntityDataTypes.NAME,
                     VariableManage.stringReplace(player, this.getNameTag(), this.getConfig())
             );
-            player.dataPacket(clone);
+            player.dataPacket(pk);
         }
     }
 }

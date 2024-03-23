@@ -38,7 +38,7 @@ public class DialogPages {
         this.defaultPage = config.getString("defaultPage");
         this.config.getMapList("pages").forEach(page -> {
             try {
-                DialogPage dialogPage = new DialogPage(this, page);
+                DialogPage dialogPage = new DialogPage(this, (Map<String, Object>) page);
                 this.dialogPageMap.put(dialogPage.getKey(), dialogPage);
             } catch (Exception e) {
                 RsNPC.getInstance().getLogger().error(RsNPC.getInstance().getLanguage().translateString("plugin.load.dialog.dataError", this.name + "." + page.get("key")), e);

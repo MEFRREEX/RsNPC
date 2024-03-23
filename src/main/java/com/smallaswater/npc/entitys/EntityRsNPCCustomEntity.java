@@ -1,17 +1,16 @@
 package com.smallaswater.npc.entitys;
 
-import cn.lanink.gamecore.utils.EntityUtils;
 import cn.nukkit.Player;
-import cn.nukkit.entity.custom.CustomEntity;
-import cn.nukkit.entity.custom.CustomEntityDefinition;
-import cn.nukkit.entity.data.IntEntityData;
+import cn.nukkit.entity.data.EntityDataTypes;
 import cn.nukkit.entity.data.Skin;
 import cn.nukkit.level.Level;
-import cn.nukkit.level.format.FullChunk;
+import cn.nukkit.level.format.IChunk;
 import cn.nukkit.nbt.tag.CompoundTag;
 import cn.nukkit.network.protocol.AddEntityPacket;
 import cn.nukkit.network.protocol.DataPacket;
 import cn.nukkit.network.protocol.SetEntityLinkPacket;
+import cn.nukkit.network.protocol.types.EntityLink;
+import cn.nukkit.registry.Registries;
 import com.smallaswater.npc.data.RsNpcConfig;
 import com.smallaswater.npc.variable.VariableManage;
 import lombok.NonNull;
@@ -21,62 +20,37 @@ import lombok.NonNull;
  *
  * @author LT_Name
  */
-public class EntityRsNPCCustomEntity extends EntityRsNPC implements CustomEntity {
+public class EntityRsNPCCustomEntity extends EntityRsNPC {
 
-    private static final CustomEntityDefinition DEFAULT_DEFINITION = CustomEntityDefinition.builder()
-            .identifier("RsNPC:Demo")
-            .spawnEgg(false)
-            .summonable(false)
-            .build();
-
-    private CustomEntityDefinition definition;
+    private String identifier;
 
     @Deprecated
-    public EntityRsNPCCustomEntity(FullChunk chunk, CompoundTag nbt) {
+    public EntityRsNPCCustomEntity(IChunk chunk, CompoundTag nbt) {
         this(chunk, nbt, null);
     }
 
-    public EntityRsNPCCustomEntity(@NonNull FullChunk chunk, @NonNull CompoundTag nbt, RsNpcConfig config) {
+    public EntityRsNPCCustomEntity(@NonNull IChunk chunk, @NonNull CompoundTag nbt, RsNpcConfig config) {
         super(chunk, nbt, config);
-    }
-
-    public void setDefinition(CustomEntityDefinition definition) {
-        this.definition = definition;
     }
 
     @Override
     public int getNetworkId() {
-        return this.getDefinition().getRuntimeId();
-    }
-
-    /**
-     * 获取实体定义
-     * （PNX和PM1E分支独有方法）
-     *
-     * @return 实体定义
-     */
-    @Override
-    public CustomEntityDefinition getDefinition() {
-        if (this.definition == null) {
-            return DEFAULT_DEFINITION;
-        }
-        return this.definition;
+        return Registries.ENTITY.getEntityNetworkId(this.identifier);
     }
 
     public void setIdentifier(String identifier) {
-        this.definition = CustomEntityDefinition.builder()
-                .identifier(identifier)
-                .spawnEgg(false)
-                .summonable(false)
-                .build();
+        this.identifier = identifier;
+    }
+
+    public String getIdentifier() {
+        return this.identifier;
     }
 
     public void setSkinId(int skinId) {
         this.namedTag.putInt("skinId", skinId);
         this.setDataProperty(
-                new IntEntityData(EntityUtils.getEntityField("DATA_SKIN_ID", DATA_SKIN_ID),
-                        this.namedTag.getInt("skinId")
-                )
+                EntityDataTypes.SKIN_ID,
+                this.namedTag.getInt("skinId")
         );
     }
 
@@ -88,9 +62,8 @@ public class EntityRsNPCCustomEntity extends EntityRsNPC implements CustomEntity
     protected void initEntity() {
         super.initEntity();
         this.setDataProperty(
-                new IntEntityData(EntityUtils.getEntityField("DATA_SKIN_ID", DATA_SKIN_ID),
-                        this.namedTag.getInt("skinId")
-                )
+                EntityDataTypes.SKIN_ID,
+                this.namedTag.getInt("skinId")
         );
     }
 
@@ -101,7 +74,7 @@ public class EntityRsNPCCustomEntity extends EntityRsNPC implements CustomEntity
 
     @Override
     public void spawnTo(Player player) {
-        if (!this.hasSpawned.containsKey(player.getLoaderId()) && this.chunk != null && player.usedChunks.containsKey(Level.chunkHash(this.chunk.getX(), this.chunk.getZ()))) {
+        if (!this.hasSpawned.containsKey(player.getLoaderId()) && this.chunk != null && player.getUsedChunks().contains(Level.chunkHash(this.chunk.getX(), this.chunk.getZ()))) {
             this.hasSpawned.put(player.getLoaderId(), player);
             player.dataPacket(createAddEntityPacket(player));
         }
@@ -112,17 +85,43 @@ public class EntityRsNPCCustomEntity extends EntityRsNPC implements CustomEntity
             SetEntityLinkPacket pk = new SetEntityLinkPacket();
             pk.vehicleUniqueId = this.riding.getId();
             pk.riderUniqueId = this.getId();
-            pk.type = 1;
+            pk.type = EntityLink.Type.RIDER;
             pk.immediate = 1;
 
             player.dataPacket(pk);
         }
     }
 
+    @Override
+    public DataPacket createAddEntityPacket() {
+        AddEntityPacket addEntity = new AddEntityPacket();
+        addEntity.type = this.getNetworkId();
+        addEntity.entityUniqueId = this.getId();
+        addEntity.id = this.getIdentifier();
+        addEntity.entityRuntimeId = this.getId();
+        addEntity.yaw = (float) this.yaw;
+        addEntity.headYaw = (float) this.yaw;
+        addEntity.pitch = (float) this.pitch;
+        addEntity.x = (float) this.x;
+        addEntity.y = (float) this.y + this.getBaseOffset();
+        addEntity.z = (float) this.z;
+        addEntity.speedX = (float) this.motionX;
+        addEntity.speedY = (float) this.motionY;
+        addEntity.speedZ = (float) this.motionZ;
+        addEntity.entityData = this.entityDataMap;
+
+        addEntity.links = new EntityLink[this.passengers.size()];
+        for (int i = 0; i < addEntity.links.length; i++) {
+            addEntity.links[i] = new EntityLink(this.getId(), this.passengers.get(i).getId(), i == 0 ? EntityLink.Type.RIDER : EntityLink.Type.PASSENGER, false, false);
+        }
+
+        return addEntity;
+    }
+
     public DataPacket createAddEntityPacket(Player player) {
         AddEntityPacket pk = (AddEntityPacket) this.createAddEntityPacket();
-        pk.metadata.putString(
-                EntityUtils.getEntityField("DATA_NAMETAG", DATA_NAMETAG),
+        pk.entityData.putType(
+                EntityDataTypes.NAME,
                 VariableManage.stringReplace(player, this.getNameTag(), this.getConfig())
         );
         return pk;
@@ -132,4 +131,5 @@ public class EntityRsNPCCustomEntity extends EntityRsNPC implements CustomEntity
     public void setSkin(Skin skin) {
         this.skin = skin;
     }
+
 }

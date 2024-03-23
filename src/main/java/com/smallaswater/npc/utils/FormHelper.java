@@ -247,12 +247,12 @@ public class FormHelper {
                 rsNpcConfig.setShowName(showName);
                 rsNpcConfig.setNameTagAlwaysVisible(formResponseCustom.getToggleResponse(1));
                 //物品
-                rsNpcConfig.setHand(Item.fromString(formResponseCustom.getInputResponse(2)));
+                rsNpcConfig.setHand(Item.get(formResponseCustom.getInputResponse(2)));
                 Item[] items = new Item[4];
-                items[0] = Item.fromString(formResponseCustom.getInputResponse(3));
-                items[1] = Item.fromString(formResponseCustom.getInputResponse(4));
-                items[2] = Item.fromString(formResponseCustom.getInputResponse(5));
-                items[3] = Item.fromString(formResponseCustom.getInputResponse(6));
+                items[0] = Item.get(formResponseCustom.getInputResponse(3));
+                items[1] = Item.get(formResponseCustom.getInputResponse(4));
+                items[2] = Item.get(formResponseCustom.getInputResponse(5));
+                items[3] = Item.get(formResponseCustom.getInputResponse(6));
                 rsNpcConfig.setArmor(items);
                 //skin
                 String skinName = skinOptions.get(formResponseCustom.getDropdownResponse(7).getElementID());

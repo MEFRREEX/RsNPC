@@ -1,11 +1,11 @@
 package com.smallaswater.npc.route;
 
 import cn.nukkit.Server;
-import cn.nukkit.block.Block;
-import cn.nukkit.block.BlockFence;
-import cn.nukkit.block.BlockFenceGate;
+import cn.nukkit.block.*;
 import cn.nukkit.level.Level;
 import cn.nukkit.level.ParticleEffect;
+import cn.nukkit.level.Position;
+import cn.nukkit.level.format.IChunk;
 import cn.nukkit.math.Vector3;
 import cn.nukkit.scheduler.AsyncTask;
 import com.smallaswater.npc.RsNPC;
@@ -20,11 +20,11 @@ import java.util.LinkedList;
  */
 @Getter
 public class RouteFinder {
-    
+
     private final int startTick;
-    
+
     private boolean processingComplete = false;
-    
+
     private final Level level;
     private final Vector3 start;
     private final Vector3 end;
@@ -34,17 +34,17 @@ public class RouteFinder {
     ArrayList<Vector3> closeNodes = new ArrayList<>();
 
     LinkedList<Node> nodes = new LinkedList<>();
-    
+
     public RouteFinder(@NotNull Level level, @NotNull Vector3 start, @NotNull Vector3 end) {
         this(level, start, end, true);
     }
-    
+
     public RouteFinder(@NotNull Level level, @NotNull Vector3 start, @NotNull Vector3 end, boolean async) {
         this.startTick = Server.getInstance().getTick();
         this.level = level;
         this.start = start.floor();
         this.end = end.floor();
-    
+
         this.distance = (int) start.distance(end);
 
         if (async) {
@@ -54,7 +54,7 @@ public class RouteFinder {
                     process();
                 }
             });
-        }else {
+        } else {
             this.process();
         }
     }
@@ -64,7 +64,7 @@ public class RouteFinder {
      */
     private void process() {
         this.openNodes.add(new Node(this.start));
-        
+
         Node nowNode;
         while ((nowNode = this.openNodes.poll()) != null && Server.getInstance().isRunning()) {
             //到达终点，保存路径
@@ -78,20 +78,20 @@ public class RouteFinder {
                 }
                 break;
             }
-    
+
             //超时跳出 (60s)
             if (Server.getInstance().getTick() - this.startTick > 20 * 60) {
                 break;
             }
-    
+
             LinkedList<Node> nextNodes = new LinkedList<>();
-            
+
             for (int y = 1; y > -1; y--) {
                 boolean N = this.check(nowNode, nextNodes, 0, y, -1);
                 boolean E = this.check(nowNode, nextNodes, 1, y, 0);
                 boolean S = this.check(nowNode, nextNodes, 0, y, 1);
                 boolean W = this.check(nowNode, nextNodes, -1, y, 0);
-                
+
                 if (N && E) {
                     this.check(nowNode, nextNodes, 1, y, -1);
                 }
@@ -105,11 +105,11 @@ public class RouteFinder {
                     this.check(nowNode, nextNodes, -1, y, -1);
                 }
             }
-    
+
             if (nextNodes.isEmpty()) {
                 continue;
             }
-            
+
             this.openNodes.addAll(nextNodes);
             this.openNodes.sort((o1, o2) -> {
                 double d1 = o1.getF();
@@ -120,10 +120,10 @@ public class RouteFinder {
                 return d1 > d2 ? 1 : -1;
             });
         }
-        
+
         this.processingComplete = true;
     }
-    
+
     private boolean check(Node nowNode, LinkedList<Node> nextNodes, int x, int y, int z) {
         Vector3 vector3 = nowNode.getVector3().add(x, y, z);
         if (this.closeNodes.contains(vector3)) {
@@ -138,43 +138,43 @@ public class RouteFinder {
         }
         return false;
     }
-    
+
     /**
      * 检查是否可以移动到目标节点
      *
      * @param nowNode 当前节点
-     * @param target 目标节点
+     * @param target  目标节点
      * @return 是否可以移动到目标节点
      */
     private boolean canMoveTo(Node nowNode, Node target) {
-        if (!this.level.getBlock(target.getVector3()).canPassThrough() ||
-                !this.level.getBlock(target.getVector3().add(0, 1, 0)).canPassThrough() ||
-                !this.canWalkOn(this.level.getBlock(target.getVector3().add(0, -1, 0)))) {
+        if (!this.getBlockFast(target).canPassThrough() ||
+                !this.getBlockFast(target.getVector3().add(0, 1, 0)).canPassThrough() ||
+                !this.canWalkOn(this.getBlockFast(target.getVector3().add(0, -1, 0)))) {
             return false;
         }
-        
+
         //跳跃检查
         if (target.getVector3().getY() > nowNode.getVector3().getY() &&
-                !this.level.getBlock(nowNode.getVector3().add(0, 2, 0)).canPassThrough()) {
+                !this.getBlockFast(nowNode.getVector3().add(0, 2, 0)).canPassThrough()) {
             return false;
         }
-        
+
         if (target.getVector3().getY() < nowNode.getVector3().getY() &&
-                !this.level.getBlock(target.getVector3().add(0, 2, 0)).canPassThrough()) {
+                !this.getBlockFast(target.getVector3().add(0, 2, 0)).canPassThrough()) {
             return false;
         }
-        
+
         return true;
     }
 
     private boolean canWalkOn(Block block) {
-        if (block.getId() == Block.FLOWING_LAVA || block.getId() == Block.STILL_LAVA || block.getId() == Block.CACTUS) {
+        if (block.getId() == Block.FLOWING_LAVA || block.getId() == Block.LAVA || block.getId() == Block.CACTUS) {
             return false;
         }
         if (block instanceof BlockFence || block instanceof BlockFenceGate) {
             return false;
         }
-        if (block.getId() == Block.STILL_WATER || block.getId() == Block.FLOWING_WATER) {
+        if (block.getId() == Block.WATER || block.getId() == Block.FLOWING_WATER) {
             return true;
         }
         return !block.canPassThrough();
@@ -192,5 +192,50 @@ public class RouteFinder {
             this.level.addParticleEffect(node.getVector3().add(-0.1, 0, -0.1), ParticleEffect.REDSTONE_TORCH_DUST);
         }
     }
-    
+
+    /**
+     * 快速获取方块
+     *
+     * @param node 节点
+     * @return 方块
+     */
+    public Block getBlockFast(Node node) {
+        return this.getBlockFast(node.getVector3());
+    }
+
+    /**
+     * 快速获取方块
+     *
+     * @param vector3 位置
+     * @return 方块
+     */
+    public Block getBlockFast(Vector3 vector3) {
+        return this.getBlockFast(vector3.getFloorX(), vector3.getFloorY(), vector3.getFloorZ());
+    }
+
+    /**
+     * 快速获取方块
+     *
+     * @param x 坐标x
+     * @param y 坐标y
+     * @param z 坐标z
+     * @return 方块
+     */
+    public Block getBlockFast(int x, int y, int z) {
+        if (!"Nukkit".equals(Server.getInstance().getName())) {
+            return this.level.getBlock(x, y, z);
+        }
+        BlockState fullState = BlockAir.STATE;
+        if (y >= 0 && y < 256) {
+            int cx = x >> 4;
+            int cz = z >> 4;
+            IChunk chunk = this.getLevel().getChunk(cx, cz);
+
+            if (chunk != null) {
+                fullState = chunk.getBlockState(x & 15, y, z & 15);
+            }
+        }
+        return fullState.toBlock(new Position(x, y, z, this.getLevel()));
+    }
+
 }

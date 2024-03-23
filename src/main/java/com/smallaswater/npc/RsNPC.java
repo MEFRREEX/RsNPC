@@ -7,6 +7,9 @@ import cn.nukkit.entity.Entity;
 import cn.nukkit.entity.data.Skin;
 import cn.nukkit.level.Level;
 import cn.nukkit.plugin.PluginBase;
+import cn.nukkit.registry.EntityRegistry;
+import cn.nukkit.registry.RegisterException;
+import cn.nukkit.registry.Registries;
 import cn.nukkit.utils.Config;
 import cn.nukkit.utils.SerializedImage;
 import com.smallaswater.npc.command.RsNPCCommand;
@@ -116,19 +119,12 @@ public class RsNPC extends PluginBase {
 
         this.getLogger().info(this.getLanguage().translateString("plugin.load.startLoad"));
 
-        //检查插件分支是否和核心匹配
-        NukkitTypeUtils.NukkitType nukkitType = NukkitTypeUtils.getNukkitType();
-        if (nukkitType != NukkitTypeUtils.NukkitType.POWER_NUKKIT_X) {
-            this.getLogger().error("警告！您所使用的插件版本不支持此Nukkit分支！");
-            this.getLogger().error("服务器核心 : " + nukkitType.getShowName() + "  |  插件版本 : " + this.getVersion());
-            this.getLogger().error("请使用PowerNukkitX核心！或更换为对应版本的插件！");
-            this.getServer().getPluginManager().disablePlugin(this);
-            return;
-        }
-
         ConfigUpdateUtils.updateConfig();
 
-        Entity.registerEntity("EntityRsNpc", EntityRsNPC.class);
+        try {
+            Registries.ENTITY.registerCustomEntity(this, new EntityRegistry.CustomEntityDefinition("rsnpc:npc", "", false, true), EntityRsNPC.class);
+        } catch (RegisterException ignore) {
+        }
 
         this.getLogger().info(this.getLanguage().translateString("plugin.load.startLoadDialog"));
         this.dialogManager = new DialogManager(this);

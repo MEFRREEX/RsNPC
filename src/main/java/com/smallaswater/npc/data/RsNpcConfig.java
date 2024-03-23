@@ -2,15 +2,16 @@ package com.smallaswater.npc.data;
 
 import cn.lanink.gamecore.utils.ConfigUtils;
 import cn.nukkit.Server;
+import cn.nukkit.block.Block;
 import cn.nukkit.entity.Entity;
-import cn.nukkit.entity.custom.CustomEntityDefinition;
 import cn.nukkit.entity.data.Skin;
-import cn.nukkit.entity.provider.CustomClassEntityProvider;
 import cn.nukkit.item.Item;
 import cn.nukkit.level.Level;
 import cn.nukkit.level.Location;
 import cn.nukkit.math.Vector3;
 import cn.nukkit.nbt.tag.CompoundTag;
+import cn.nukkit.registry.EntityRegistry;
+import cn.nukkit.registry.Registries;
 import cn.nukkit.utils.Config;
 import com.smallaswater.npc.RsNPC;
 import com.smallaswater.npc.entitys.EntityRsNPC;
@@ -98,7 +99,7 @@ public class RsNpcConfig {
 
     // 自定义实体
     private boolean enableCustomEntity;
-    private CustomEntityDefinition customEntityDefinition;
+    private String customEntityIdentifier;
     private int customEntitySkinId;
 
     //自定义碰撞大小
@@ -265,14 +266,12 @@ public class RsNpcConfig {
 
         try {
             this.enableCustomEntity = this.config.getBoolean("CustomEntity.enable", false);
-            String identifier = this.config.getString("CustomEntity.identifier", "RsNPC:Demo");
+            this.customEntityIdentifier = this.config.getString("CustomEntity.identifier", "RsNPC:Demo");
             this.customEntitySkinId = this.config.getInt("CustomEntity.skinId", 0);
-            if (this.enableCustomEntity) {
-                this.customEntityDefinition = CustomEntityDefinition.builder()
-                        .identifier(identifier)
-                        .spawnEgg(false)
-                        .summonable(false).build();
-                Entity.registerCustomEntity(new CustomClassEntityProvider(this.customEntityDefinition, EntityRsNPCCustomEntity.class));
+            if (this.enableCustomEntity && Registries.ENTITY.getEntityNetworkId(this.customEntityIdentifier) == 0) {
+                Registries.ENTITY.registerCustomEntity(RsNPC.getInstance(),
+                        new EntityRegistry.CustomEntityDefinition(this.customEntityIdentifier, "", false, true),
+                        EntityRsNPC.class);
             }
         }catch (Exception e) {
             throw new RsNpcConfigLoadException("NPC配置 自定义实体配置加载失败！请检查配置文件！", e);
@@ -343,7 +342,7 @@ public class RsNpcConfig {
         this.config.set("dialog.dialog", this.dialogPagesName);
 
         this.config.set("CustomEntity.enable", this.enableCustomEntity);
-        this.config.set("CustomEntity.identifier", this.customEntityDefinition == null ? "RsNPC:Demo" : this.customEntityDefinition.getStringId());
+        this.config.set("CustomEntity.identifier", this.customEntityIdentifier);
         this.config.set("CustomEntity.skinId", this.customEntitySkinId);
 
         this.config.set("CustomCollisionSize.enable", this.enableCustomCollisionSize);
@@ -356,8 +355,8 @@ public class RsNpcConfig {
 
     public void checkEntity() {
         this.location.setLevel(Server.getInstance().getLevelByName(this.levelName));
-        if ((this.location.getLevel() == null && !Server.getInstance().loadLevel(this.levelName)) || this.location.getLevel().getProvider() == null) {
-            RsNPC.getInstance().getLogger().error("世界: " + this.levelName + " 无法加载！NPC: " + this.name + "无法生成！");
+        if (this.location.getLevel() == null || this.location.getLevel().getProvider() == null) {
+            RsNPC.getInstance().getLogger().error("level: " + this.levelName + " cant load the NPC: " + this.name);
             return;
         }
         if (this.location.getChunk() != null &&
@@ -369,12 +368,12 @@ public class RsNpcConfig {
                         .putCompound("Skin", (new CompoundTag())
                                 .putByteArray("Data", this.skin.getSkinData().data)
                                 .putString("ModelId", this.skin.getSkinId()));
-                if (this.enableCustomEntity && this.customEntityDefinition != null) {
+                if (this.enableCustomEntity && this.customEntityIdentifier != null) {
                     nbt.putInt("skinId", this.customEntitySkinId);
                     this.entityRsNpc = new EntityRsNPCCustomEntity(this.location.getChunk(), nbt, this);
                     EntityRsNPCCustomEntity entityRsNPC = (EntityRsNPCCustomEntity) this.entityRsNpc;
-                    entityRsNPC.setDefinition(this.customEntityDefinition);
-                }else {
+                    entityRsNPC.setIdentifier(this.customEntityIdentifier);
+                } else {
                     this.entityRsNpc = new EntityRsNPC(this.location.getChunk(), nbt, this);
                     this.entityRsNpc.setSkin(this.getSkin());
                 }
@@ -499,16 +498,21 @@ public class RsNpcConfig {
         }
 
         public Item getHand() {
-            if (this.hand == null || this.hand.getId() == 0) {
+            if (this.hand == null || this.hand.isNull()) {
                 String string = this.handString;
                 if (string.trim().isEmpty()) {
-                    string = "0:0";
+                    string = "minecraft:air:0";
                 }
+                String[] split = string.split(":");
                 try {
-                    this.hand = Item.fromString(string);
+                    if (split.length == 3) {
+                        this.hand = Item.get(split[0] + ":" + split[1], 0, Integer.parseInt(split[2]));
+                    } else {
+                        this.hand = Item.get(split[0] + ":" + split[1]);
+                    }
                 } catch (Exception e) {
-                    this.hand = Item.get(Item.INFO_UPDATE);
-                    RsNPC.getInstance().getLogger().warning("NPC配置 hand-item物品 " + string + " 加载失败！请检查配置文件！");
+                    this.hand = Item.get(Block.INFO_UPDATE);
+                    RsNPC.getInstance().getLogger().warning("NPC config `handheldItem` " + string + " error! Please check the config file!");
                 }
             }
             return this.hand;
@@ -516,16 +520,21 @@ public class RsNpcConfig {
 
         public Item[] getArmor() {
             for (int i = 0; i < this.armor.length; i++) {
-                if (this.armor[i] == null || this.armor[i].getId() == 0) {
+                if (this.armor[i] == null || this.armor[i].isNull()) {
                     String string = this.armorString[i];
                     if (string.trim().isEmpty()) {
-                        string = "0:0";
+                        string = "minecraft:air:0";
                     }
+                    String[] split = string.split(":");
                     try {
-                        this.armor[i] = Item.fromString(string);
+                        if (split.length == 3) {
+                            this.armor[i] = Item.get(split[0] + ":" + split[1], 0, Integer.parseInt(split[2]));
+                        } else {
+                            this.armor[i] = Item.get(split[0] + ":" + split[1]);
+                        }
                     } catch (Exception e) {
-                        this.armor[i] = Item.get(Item.INFO_UPDATE);
-                        RsNPC.getInstance().getLogger().warning("NPC配置 护甲 " + string + " 加载失败！请检查配置文件！");
+                        this.armor[i] = Item.get(Block.INFO_UPDATE);
+                        RsNPC.getInstance().getLogger().warning("NPC config `chestItem...` " + string + " error! Please check the config file!");
                     }
                 }
             }

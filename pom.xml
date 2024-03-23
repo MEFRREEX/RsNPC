@@ -88,8 +88,9 @@
         <dependency>
             <groupId>cn.powernukkitx</groupId>
             <artifactId>powernukkitx</artifactId>
-            <version>1.20.40-r1</version>
-            <scope>provided</scope>
+            <version>2.0.0</version>
+            <scope>system</scope>
+            <systemPath>${project.basedir}/lib/powernukkitx-2.0.0-SNAPSHOT-all.jar</systemPath>
         </dependency>
 
         <dependency>

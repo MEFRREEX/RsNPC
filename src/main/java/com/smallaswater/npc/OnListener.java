@@ -41,7 +41,7 @@ public class OnListener implements Listener {
     @EventHandler
     public void onPlayerInteractEntity(PlayerInteractEntityEvent event) {
         Entity entity = event.getEntity();
-        if (entity instanceof EntityRsNPC rsNpc) {
+        if (entity instanceof EntityRsNPC) {
             event.setCancelled(true);
             Player player = event.getPlayer();
             EntityRsNPC entityRsNPC = (EntityRsNPC) entity;
@@ -61,11 +61,13 @@ public class OnListener implements Listener {
     @EventHandler
     public void onDamage(EntityDamageEvent event) {
         Entity entity = event.getEntity();
-        if (entity instanceof EntityRsNPC entityRsNpc) {
+        if (entity instanceof EntityRsNPC) {
             event.setCancelled(true);
             if (event instanceof EntityDamageByEntityEvent) {
                 Entity damage = ((EntityDamageByEntityEvent) event).getDamager();
-                if (damage instanceof Player player) {
+                if (damage instanceof Player) {
+                    Player player = (Player) damage;
+                    EntityRsNPC entityRsNpc = (EntityRsNPC) entity;
                     RsNpcConfig rsNpcConfig = entityRsNpc.getConfig();
                     if (!rsNpcConfig.isCanProjectilesTrigger() &&
                             event instanceof EntityDamageByChildEntityEvent) {
@@ -81,8 +83,8 @@ public class OnListener implements Listener {
                         DialogPages dialogConfig = this.rsNPC.getDialogManager().getDialogConfig(rsNpcConfig.getDialogPagesName());
                         if (dialogConfig != null) {
                             dialogConfig.getDefaultDialogPage().send(entityRsNpc, player);
-                        }else {
-                            String message = "NPC " + rsNpcConfig.getName() + " configuration error！Dialog not found: " + rsNpcConfig.getDialogPagesName();
+                        } else {
+                            String message = "§cNPC " + rsNpcConfig.getName() + " 配置错误！不存在名为 " + rsNpcConfig.getDialogPagesName() + " 的对话框页面！";
                             this.rsNPC.getLogger().warning(message);
                             if (player.isOp()) {
                                 player.sendMessage(message);
@@ -96,21 +98,18 @@ public class OnListener implements Listener {
 
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
     public void onDataPacketSend(DataPacketSendEvent event) {
-        if (Api.isHideCustomSkin(event.getPlayer())) {
-            if (event.getPacket() instanceof PlayerListPacket) {
-                PlayerListPacket packet = (PlayerListPacket) event.getPacket();
+        if (event.getPacket() instanceof PlayerListPacket packet) {
+            if (Api.isHideCustomSkin(event.getPlayer())) {
                 for (PlayerListPacket.Entry entry : packet.entries) {
                     for (RsNpcConfig config : this.rsNPC.getNpcs().values()) {
                         EntityRsNPC entityRsNpc = config.getEntityRsNpc();
                         if (entityRsNpc != null && entityRsNpc.getUniqueId() == entry.uuid) {
-                            entry.skin = this.rsNPC.getSkinByName("默认skin");
+                            entry.skin = this.rsNPC.getSkinByName("默认皮肤");
                             break;
                         }
                     }
                 }
-                packet.encode();
             }
         }
     }
-
 }
