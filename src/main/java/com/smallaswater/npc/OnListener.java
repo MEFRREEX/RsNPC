@@ -41,7 +41,9 @@ public class OnListener implements Listener {
     @EventHandler
     public void onPlayerInteractEntity(PlayerInteractEntityEvent event) {
         Entity entity = event.getEntity();
+        System.out.println(entity);
         if (entity instanceof EntityRsNPC) {
+            System.out.println("1");
             event.setCancelled(true);
             Player player = event.getPlayer();
             EntityRsNPC entityRsNPC = (EntityRsNPC) entity;
@@ -59,36 +61,38 @@ public class OnListener implements Listener {
     }
 
     @EventHandler
-    public void onDamage(EntityDamageEvent event) {
-        Entity entity = event.getEntity();
-        if (entity instanceof EntityRsNPC) {
-            event.setCancelled(true);
-            if (event instanceof EntityDamageByEntityEvent) {
-                Entity damage = ((EntityDamageByEntityEvent) event).getDamager();
-                if (damage instanceof Player) {
-                    Player player = (Player) damage;
-                    EntityRsNPC entityRsNpc = (EntityRsNPC) entity;
-                    RsNpcConfig rsNpcConfig = entityRsNpc.getConfig();
-                    if (!rsNpcConfig.isCanProjectilesTrigger() &&
-                            event instanceof EntityDamageByChildEntityEvent) {
-                        return;
-                    }
-                    entityRsNpc.setPauseMoveTick(60);
-                    Utils.executeCommand(player, rsNpcConfig);
-                    for (String message : rsNpcConfig.getMessages()) {
-                        player.sendMessage(VariableManage.stringReplace(player, message, rsNpcConfig));
-                    }
+    public void onChildDamage(EntityDamageByChildEntityEvent event) {
+        if (event.getEntity() instanceof EntityRsNPC entityRsNpc) {
+            event.setCancelled();
+        }
+    }
 
-                    if (rsNpcConfig.isEnabledDialogPages()) {
-                        DialogPages dialogConfig = this.rsNPC.getDialogManager().getDialogConfig(rsNpcConfig.getDialogPagesName());
-                        if (dialogConfig != null) {
-                            dialogConfig.getDefaultDialogPage().send(entityRsNpc, player);
-                        } else {
-                            String message = "§cNPC " + rsNpcConfig.getName() + " 配置错误！不存在名为 " + rsNpcConfig.getDialogPagesName() + " 的对话框页面！";
-                            this.rsNPC.getLogger().warning(message);
-                            if (player.isOp()) {
-                                player.sendMessage(message);
-                            }
+    @EventHandler
+    public void onDamage(EntityDamageByEntityEvent event) {
+        Entity entity = event.getEntity();
+        if (entity instanceof EntityRsNPC entityRsNpc) {
+            event.setCancelled();
+
+            Entity damage = event.getDamager();
+            if (damage instanceof Player) {
+                Player player = (Player) damage;
+                RsNpcConfig rsNpcConfig = entityRsNpc.getConfig();
+                
+                entityRsNpc.setPauseMoveTick(60);
+                Utils.executeCommand(player, rsNpcConfig);
+                for (String message : rsNpcConfig.getMessages()) {
+                    player.sendMessage(VariableManage.stringReplace(player, message, rsNpcConfig));
+                }
+
+                if (rsNpcConfig.isEnabledDialogPages()) {
+                    DialogPages dialogConfig = this.rsNPC.getDialogManager().getDialogConfig(rsNpcConfig.getDialogPagesName());
+                    if (dialogConfig != null) {
+                        dialogConfig.getDefaultDialogPage().send(entityRsNpc, player);
+                    } else {
+                        String message = "§cNPC " + rsNpcConfig.getName() + " 配置错误！不存在名为 " + rsNpcConfig.getDialogPagesName() + " 的对话框页面！";
+                        this.rsNPC.getLogger().warning(message);
+                        if (player.isOp()) {
+                            player.sendMessage(message);
                         }
                     }
                 }
