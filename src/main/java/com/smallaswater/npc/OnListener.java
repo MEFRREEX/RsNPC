@@ -41,9 +41,7 @@ public class OnListener implements Listener {
     @EventHandler
     public void onPlayerInteractEntity(PlayerInteractEntityEvent event) {
         Entity entity = event.getEntity();
-        System.out.println(entity);
         if (entity instanceof EntityRsNPC) {
-            System.out.println("1");
             event.setCancelled(true);
             Player player = event.getPlayer();
             EntityRsNPC entityRsNPC = (EntityRsNPC) entity;
